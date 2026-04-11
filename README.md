@@ -69,19 +69,21 @@ RealEstateBooking.sln
 └── RealEstateBooking.Infrastructure/  # Data — EF Core, repositories, migrations
 ```
 
+
 ### Dependency flow
-
-```
-API  →  Application  →  Domain
-              ↑
-       Infrastructure
-```
-
+ 
+| Project | Depends on |
+|---|---|
+| `RealEstateBooking.API` | Application, Infrastructure |
+| `RealEstateBooking.Application` | Domain |
+| `RealEstateBooking.Infrastructure` | Application, Domain |
+| `RealEstateBooking.Domain` | — |
+ 
 - `Domain` has no dependencies on any other project
 - `Application` depends only on `Domain`
 - `Infrastructure` implements interfaces defined in `Application`
 - `API` wires everything together via dependency injection
-
+ 
 ---
 
 ## Project breakdown
