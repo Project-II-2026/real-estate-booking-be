@@ -1,0 +1,17 @@
+# Build output
+bin/
+obj/
+
+# Rider/IDE
+.idea/
+
+# User-specific settings
+*.user
+*.suo
+
+# Environment specific
+appsettings.Development.json
+
+.idea
+appsettings.Development.json
+.DS_Store
