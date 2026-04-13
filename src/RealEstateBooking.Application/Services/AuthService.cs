@@ -1,8 +1,6 @@
-using System.Security.Cryptography;
 using RealEstateBooking.Application.DTOs.Auth;
 using RealEstateBooking.Application.Interfaces.Repositories;
 using RealEstateBooking.Application.Interfaces.Services;
-using RealEstateBooking.Domain.Entities;
 using RealEstateBooking.Domain.Exceptions;
 
 namespace RealEstateBooking.Application.Services;
@@ -50,5 +48,15 @@ public class AuthService(
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken.Token,
         };
+    }
+    
+    public async Task LogoutAsync(string refreshToken)
+    {
+        var token = await refreshTokenRepository.GetAsync(refreshToken);
+        if (token is not null)
+        {
+            token.IsRevoked = true;
+            await refreshTokenRepository.UpdateAsync(token);
+        }
     }
 }

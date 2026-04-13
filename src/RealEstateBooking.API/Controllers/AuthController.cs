@@ -42,6 +42,14 @@ public class AuthController(
 
         return NoContent();
     }
+    
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete("accessToken");
+        Response.Cookies.Delete("refreshToken");
+        return NoContent();
+    }
 
     private void AppendTokenCookie(string cookieName, string token, DateTimeOffset expires)
     {

@@ -19,4 +19,11 @@ public class RefreshTokenRepository(AppDbContext context) : IRefreshTokenReposit
             refreshToken => refreshToken.Token == token
             );
     }
+
+    public async Task<RefreshToken?> UpdateAsync(RefreshToken token)
+    {
+        context.RefreshTokens.Update(token);
+        await context.SaveChangesAsync();
+        return token;
+    }
 }

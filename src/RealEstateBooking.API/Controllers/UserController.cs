@@ -8,7 +8,6 @@ namespace RealEstateBooking.API.Controllers;
 [Route("/users")]
 public class UserController(IUserService userService) : BaseController
 {
-    [Authorize]
     [HttpPost("register")]
     public async Task<ActionResult<RegistrationResponseDto>> Register(RegistrationRequestDto dto)
     {
