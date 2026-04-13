@@ -1,0 +1,38 @@
+using Mapster;
+using RealEstateBooking.Application.DTOs.Auth;
+using RealEstateBooking.Application.Interfaces.Repositories;
+using RealEstateBooking.Application.Interfaces.Services;
+using RealEstateBooking.Domain.Entities;
+using RealEstateBooking.Domain.Enums;
+using RealEstateBooking.Domain.Exceptions;
+
+namespace RealEstateBooking.Application.Services;
+
+public class UserService(
+    IUserRepository userRepository, 
+    IRoleRepository roleRepository) : IUserService
+{
+    public async Task<RegistrationResponseDto> RegisterAsync(RegistrationRequestDto request)
+    {
+        if (request.Password != request.PasswordConfirmation)
+            throw new BadRequestException("Passwords do not match.");
+
+        if (await userRepository.ExistsByEmailOrUsernameAsync(request.Email, request.Username))
+            throw new ConflictException("Email or username is already in use.");
+
+        var role = await roleRepository.GetByNameAsync(nameof(UserRole.User))
+                   ?? throw new NotFoundException("Default role not found.");
+
+        var user = request.Adapt<User>();
+        user.RoleId = role.Id;
+
+        await userRepository.AddAsync(user);
+
+        return new RegistrationResponseDto
+        {
+            Username = user.Username,
+            Email = user.Email,
+            Role = role.Name
+        };
+    }
+}
