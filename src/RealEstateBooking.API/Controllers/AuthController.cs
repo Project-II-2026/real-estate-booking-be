@@ -45,7 +45,9 @@ public class AuthController(
     
     [HttpPost("logout")]
     public IActionResult Logout()
-    {
+    {   
+        // TODO: Add call to service to invalidate refresh token
+        // await authService.RefreshTokenAsync(refreshToken);
         Response.Cookies.Delete("accessToken");
         Response.Cookies.Delete("refreshToken");
         return NoContent();

@@ -1,5 +1,6 @@
 using Mapster;
 using RealEstateBooking.Application.DTOs.Auth;
+using RealEstateBooking.Application.DTOs.User;
 using RealEstateBooking.Application.Interfaces.Repositories;
 using RealEstateBooking.Application.Interfaces.Services;
 using RealEstateBooking.Domain.Entities;
@@ -34,5 +35,13 @@ public class UserService(
             Email = user.Email,
             Role = role.Name
         };
+    }
+
+    public async Task<UserResponseDto> GetByIdAsync(int id)
+    {
+        var user = await userRepository.GetByIdAsync(id)
+                   ?? throw new NotFoundException($"User with id {id} was not found.");
+
+        return user.Adapt<UserResponseDto>();
     }
 }

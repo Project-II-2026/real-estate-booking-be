@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RealEstateBooking.Application.DTOs.Auth;
+using RealEstateBooking.Application.DTOs.User;
 using RealEstateBooking.Application.Interfaces.Services;
 
 namespace RealEstateBooking.API.Controllers;
@@ -13,5 +14,12 @@ public class UserController(IUserService userService) : BaseController
     {
         var result = await userService.RegisterAsync(dto);
         return CreatedAtAction(nameof(Register), result);
+    }
+
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<UserResponseDto>> GetById(int id)
+    {
+        var result = await userService.GetByIdAsync(id);
+        return Ok(result);
     }
 }

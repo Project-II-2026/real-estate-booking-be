@@ -1,5 +1,6 @@
 using Mapster;
 using RealEstateBooking.Application.DTOs.Auth;
+using RealEstateBooking.Application.DTOs.User;
 using RealEstateBooking.Domain.Entities;
 
 namespace RealEstateBooking.Application.Mappers;
@@ -20,6 +21,9 @@ public class UserMapper
             .Ignore(dest => dest.RoleId);
         
         TypeAdapterConfig<User, RegistrationResponseDto>.NewConfig()
+            .Map(dest => dest.Role, src => src.Role.Name);
+        
+        TypeAdapterConfig<User, UserResponseDto>.NewConfig()
             .Map(dest => dest.Role, src => src.Role.Name);
     }
 }
