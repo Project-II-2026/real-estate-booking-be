@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using RealEstateBooking.Application.DTOs.Auth;
 using RealEstateBooking.Application.DTOs.User;
 
@@ -8,4 +9,5 @@ public interface IUserService
     Task <RegistrationResponseDto> RegisterAsync(RegistrationRequestDto request);
     
     Task<UserResponseDto> GetByIdAsync(int id);
+    Task<UserResponseDto> GetMeAsync(ClaimsPrincipal claimsPrincipal);
 }

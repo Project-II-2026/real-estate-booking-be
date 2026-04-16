@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Mapster;
 using RealEstateBooking.Application.DTOs.Auth;
 using RealEstateBooking.Application.DTOs.User;
@@ -41,6 +42,17 @@ public class UserService(
     {
         var user = await userRepository.GetByIdAsync(id)
                    ?? throw new NotFoundException($"User with id {id} was not found.");
+
+        return user.Adapt<UserResponseDto>();
+    }
+
+    public async Task<UserResponseDto> GetMeAsync(ClaimsPrincipal principal)
+    {
+        var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)
+                          ?? throw new UnauthorizedException("User is not authenticated.");
+
+        var user = await userRepository.GetByIdAsync(int.Parse(userIdClaim.Value))
+                   ?? throw new NotFoundException("User not found.");
 
         return user.Adapt<UserResponseDto>();
     }
