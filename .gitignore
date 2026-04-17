@@ -15,3 +15,4 @@ appsettings.Development.json
 .idea
 appsettings.Development.json
 .DS_Store
+.vs/
