@@ -377,3 +377,37 @@ git push origin feat/PRO-123-property-filters   # open a PR into dev when ready
 ```
 
 Keep branch names lowercase and use hyphens between words.
+
+---
+
+
+### Database migrations
+
+# Restore dependencies
+dotnet restore
+
+# Run the API
+dotnet run --project src/RealEstateBooking.API
+
+# Build the solution
+dotnet build
+
+# Create a new migration
+dotnet ef migrations add <MigrationName> \
+  --project src/RealEstateBooking.Infrastructure \
+  --startup-project src/RealEstateBooking.API
+
+# Apply migrations to the database
+dotnet ef database update \
+  --project src/RealEstateBooking.Infrastructure \
+  --startup-project src/RealEstateBooking.API
+
+# Revert all migrations
+dotnet ef database update 0 \
+  --project src/RealEstateBooking.Infrastructure \
+  --startup-project src/RealEstateBooking.API
+
+# Remove the last migration (only if not applied yet)
+dotnet ef migrations remove \
+  --project src/RealEstateBooking.Infrastructure \
+  --startup-project src/RealEstateBooking.API

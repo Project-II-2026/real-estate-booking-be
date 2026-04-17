@@ -1,6 +1,11 @@
 @RealEstateBooking.API_HostAddress = http://localhost:5163
 
-GET {{RealEstateBooking.API_HostAddress}}/weatherforecast/
-Accept: application/json
+POST {{RealEstateBooking.API_HostAddress}}/users/register
+Content-Type: application/json
 
-###
+{
+  "username": "johndoe",
+  "email": "john@example.com",
+  "password": "Secret123!",
+  "passwordConfirmation": "Secret123!"
+}
