@@ -384,30 +384,91 @@ Keep branch names lowercase and use hyphens between words.
 ### Database migrations
 
 # Restore dependencies
+```
 dotnet restore
+```
 
 # Run the API
+```
 dotnet run --project src/RealEstateBooking.API
+```
 
 # Build the solution
+```
 dotnet build
+```
 
 # Create a new migration
+```
 dotnet ef migrations add <MigrationName> \
   --project src/RealEstateBooking.Infrastructure \
   --startup-project src/RealEstateBooking.API
+```
 
 # Apply migrations to the database
+```
 dotnet ef database update \
   --project src/RealEstateBooking.Infrastructure \
   --startup-project src/RealEstateBooking.API
+```
 
 # Revert all migrations
+```
 dotnet ef database update 0 \
   --project src/RealEstateBooking.Infrastructure \
   --startup-project src/RealEstateBooking.API
+```
 
 # Remove the last migration (only if not applied yet)
+```
 dotnet ef migrations remove \
   --project src/RealEstateBooking.Infrastructure \
   --startup-project src/RealEstateBooking.API
+```
+
+
+---
+
+### Running with Docker
+
+#### Prerequisites
+- Docker and Docker Compose installed
+- A `.env_infra` file inside the `/dev` folder, configured based on `.env_infra_template.txt`
+
+---
+
+#### 1. Start the Database
+
+From the project root, run:
+
+```bash
+docker compose -f dev/docker-compose.infra.yml up -d
+```
+
+Or using the provided script:
+
+```bash
+chmod +x start_infra.sh   # only required the first time
+./start_infra.sh
+```
+
+---
+
+#### 2. Start the Application
+
+Build the image:
+
+```bash
+docker build -t real-estate-booking-api .
+```
+
+Then run the container, replacing the credentials with the ones defined in your `.env_infra` file:
+
+```bash
+docker run -p 8080:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Development \
+  -e ConnectionStrings__DefaultConnection="Host=host.docker.internal;Port=16433;Database=;Username=;Password=" \
+  real-estate-booking-api
+```
+
+The API will be available at `http://localhost:8080/swagger`.

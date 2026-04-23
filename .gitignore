@@ -16,3 +16,4 @@ appsettings.Development.json
 appsettings.Development.json
 .DS_Store
 .vs/
+.env_infra

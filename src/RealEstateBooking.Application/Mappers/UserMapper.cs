@@ -11,6 +11,9 @@ public class UserMapper
     {
         TypeAdapterConfig<RegistrationRequestDto, User>.NewConfig()
             .Map(dest => dest.Username, src => src.Username.ToLower())
+            .Map(dest => dest.PhoneNumber, src=> src.PhoneNumber)
+            .Map(dest=>dest.FirstName, src=> src.FirstName)
+            .Map(dest=>dest.LastName, src=> src.LastName)
             .Map(dest => dest.Email, src => src.Email.ToLower())
             .Map(dest => dest.PasswordHash, src => BCrypt.Net.BCrypt.HashPassword(src.Password))
             .Ignore(dest => dest.CreatedAt)
