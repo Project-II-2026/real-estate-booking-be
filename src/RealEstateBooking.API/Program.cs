@@ -1,14 +1,22 @@
 using System.Text;
+using System.Text.Json.Serialization;
+using FluentValidation;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+
+using RealEstateBooking.API.Filters;
 using RealEstateBooking.API.Middleware;
 using RealEstateBooking.Application.Interfaces.Repositories;
 using RealEstateBooking.Application.Interfaces.Services;
 using RealEstateBooking.Application.Mappers;
+using RealEstateBooking.Application.Options;
 using RealEstateBooking.Application.Services;
+using RealEstateBooking.Application.Validators;
 using RealEstateBooking.Infrastructure.Persistance;
 using RealEstateBooking.Infrastructure.Repositories;
+using RealEstateBooking.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +27,11 @@ builder.Services.AddSwaggerGen();
 
 // Mapster
 UserMapper.Configure();
+PropertyMapper.Configure();
+PropertyImageMapper.Configure();
+
+// AWS
+builder.Services.Configure<AwsSettings>(builder.Configuration.GetSection("Aws"));
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -28,11 +41,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+builder.Services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
+builder.Services.AddScoped<IS3Service, S3Service>();
+builder.Services.AddScoped<IPropertyImageService, PropertyImageService>();
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -74,8 +92,15 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Validators
+builder.Services.AddValidatorsFromAssemblyContaining<PropertyCreateRequestDtoValidator>();
+
 // controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => options.Filters.Add<ValidationFilter>())
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
 

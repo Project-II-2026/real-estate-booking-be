@@ -14,4 +14,5 @@ public class User : Audit
     public int RoleId { get; set; }
     public Role Role { get; set; } = null!;
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
+    public ICollection<Property> Properties { get; set; } = [];
 }

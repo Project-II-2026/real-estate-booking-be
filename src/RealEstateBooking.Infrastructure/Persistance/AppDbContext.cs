@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using RealEstateBooking.Domain.Entities;
 
 namespace RealEstateBooking.Infrastructure.Persistance;
@@ -8,6 +9,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Property> Properties => Set<Property>();
+    public DbSet<PropertyImage> PropertyImages => Set<PropertyImage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,6 +38,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(token => token.User)
                 .WithMany(user => user.RefreshTokens)
                 .HasForeignKey(token => token.UserId);
+        });
+
+        modelBuilder.Entity<Property>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.HasOne(p => p.Owner)
+                .WithMany(u => u.Properties)
+                .HasForeignKey(p => p.OwnerId);
+            entity.Property(p => p.Type).HasConversion<string>();
+        });
+
+        modelBuilder.Entity<PropertyImage>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.HasOne(i => i.Property)
+                .WithMany(p => p.Images)
+                .HasForeignKey(i => i.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(i => i.Status)
+                .HasConversion<string>();
         });
     }
 
