@@ -472,3 +472,70 @@ docker run -p 8080:8080 \
 ```
 
 The API will be available at `http://localhost:8080/swagger`.
+
+---
+
+### LocalStack (S3)
+
+The project uses [LocalStack](https://localstack.cloud/) to emulate AWS S3 locally. It starts automatically as part of the Docker Compose infra stack.
+
+#### Prerequisites
+
+**AWS CLI** — required to interact with LocalStack via `awslocal`.
+
+Mac:
+```bash
+curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+sudo installer -pkg AWSCLIV2.pkg -target /
+```
+
+Windows:
+```bash
+msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi
+```
+
+**Docker** — required to run the infra stack.
+
+- Mac: https://docs.docker.com/desktop/setup/install/mac-install/
+- Windows: https://docs.docker.com/desktop/setup/install/windows-install/
+
+---
+
+#### Bucket setup
+
+After starting the infra stack, create and configure the S3 bucket:
+
+```bash
+# Create the bucket
+awslocal s3 mb s3://real-estate-booking-be
+
+# Make the bucket publicly readable
+awslocal s3api put-bucket-acl \
+  --bucket real-estate-booking-be \
+  --acl public-read \
+  --endpoint-url http://localhost:4566
+
+# Configure CORS (allows PUT uploads from the frontend dev server)
+awslocal s3api put-bucket-cors \
+  --endpoint-url http://localhost:4566 \
+  --bucket real-estate-booking-be \
+  --cors-configuration '{"CORSRules": [{"AllowedOrigins": ["http://localhost:5173"], "AllowedMethods": ["PUT"], "AllowedHeaders": ["Content-Type"], "MaxAgeSeconds": 3000}]}'
+```
+
+---
+
+#### Useful commands
+
+```bash
+# List running containers
+docker ps
+
+# Open a shell inside a container (replace the ID with your LocalStack container ID)
+docker exec -it <container-id> sh
+
+# List all objects in the bucket
+awslocal s3 ls s3://real-estate-booking-be --recursive
+
+# Verify CORS configuration
+awslocal s3api get-bucket-cors --bucket real-estate-booking-be
+```
