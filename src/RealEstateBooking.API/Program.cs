@@ -29,9 +29,17 @@ builder.Services.AddSwaggerGen();
 UserMapper.Configure();
 PropertyMapper.Configure();
 PropertyImageMapper.Configure();
+BookingMapper.Configure();
+ReviewMapper.Configure();
 
 // AWS
 builder.Services.Configure<AwsSettings>(builder.Configuration.GetSection("Aws"));
+
+// Booking
+builder.Services.AddOptions<BookingSettings>()
+    .Bind(builder.Configuration.GetSection("Booking"))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -43,6 +51,8 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 builder.Services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -51,6 +61,8 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 builder.Services.AddScoped<IS3Service, S3Service>();
 builder.Services.AddScoped<IPropertyImageService, PropertyImageService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

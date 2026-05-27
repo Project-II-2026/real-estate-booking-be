@@ -11,6 +11,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<PropertyImage> PropertyImages => Set<PropertyImage>();
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<Review> Reviews => Set<Review>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -58,6 +60,38 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 .OnDelete(DeleteBehavior.Cascade);
             entity.Property(i => i.Status)
                 .HasConversion<string>();
+        });
+
+        modelBuilder.Entity<Booking>(entity =>
+        {
+            entity.HasKey(b => b.Id);
+            entity.HasOne(b => b.Property)
+                .WithMany(p => p.Bookings)
+                .HasForeignKey(b => b.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(b => b.Visitor)
+                .WithMany(u => u.Bookings)
+                .HasForeignKey(b => b.VisitorId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(b => b.Status).HasConversion<string>();
+            entity.HasIndex(b => new { b.PropertyId, b.StartTime })
+                .IsUnique()
+                .HasFilter("status = 'Confirmed'");
+        });
+
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.HasOne(r => r.Property)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.Reviewer)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(r => r.Comment).HasMaxLength(1000);
+            entity.HasIndex(r => new { r.PropertyId, r.ReviewerId }).IsUnique();
         });
     }
 

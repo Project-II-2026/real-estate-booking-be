@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RealEstateBooking.Infrastructure.Persistance;
@@ -11,9 +12,11 @@ using RealEstateBooking.Infrastructure.Persistance;
 namespace RealEstateBooking.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260526141658_AddBooking")]
+    partial class AddBooking
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,58 +248,6 @@ namespace RealEstateBooking.Infrastructure.Migrations
                     b.ToTable("refresh_token", (string)null);
                 });
 
-            modelBuilder.Entity("RealEstateBooking.Domain.Entities.Review", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("comment");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<int>("PropertyId")
-                        .HasColumnType("integer")
-                        .HasColumnName("property_id");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer")
-                        .HasColumnName("rating");
-
-                    b.Property<int>("ReviewerId")
-                        .HasColumnType("integer")
-                        .HasColumnName("reviewer_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<int>("Version")
-                        .HasColumnType("integer")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_review");
-
-                    b.HasIndex("ReviewerId")
-                        .HasDatabaseName("ix_review_reviewer_id");
-
-                    b.HasIndex("PropertyId", "ReviewerId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_review_property_id_reviewer_id");
-
-                    b.ToTable("review", (string)null);
-                });
-
             modelBuilder.Entity("RealEstateBooking.Domain.Entities.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -463,27 +414,6 @@ namespace RealEstateBooking.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("RealEstateBooking.Domain.Entities.Review", b =>
-                {
-                    b.HasOne("RealEstateBooking.Domain.Entities.Property", "Property")
-                        .WithMany("Reviews")
-                        .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_review_property_property_id");
-
-                    b.HasOne("RealEstateBooking.Domain.Entities.User", "Reviewer")
-                        .WithMany("Reviews")
-                        .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_review_user_reviewer_id");
-
-                    b.Navigation("Property");
-
-                    b.Navigation("Reviewer");
-                });
-
             modelBuilder.Entity("RealEstateBooking.Domain.Entities.User", b =>
                 {
                     b.HasOne("RealEstateBooking.Domain.Entities.Role", "Role")
@@ -501,8 +431,6 @@ namespace RealEstateBooking.Infrastructure.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("Images");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("RealEstateBooking.Domain.Entities.Role", b =>
@@ -517,8 +445,6 @@ namespace RealEstateBooking.Infrastructure.Migrations
                     b.Navigation("Properties");
 
                     b.Navigation("RefreshTokens");
-
-                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

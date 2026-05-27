@@ -17,4 +17,7 @@ public class Property : Audit
 
     public int OwnerId { get; set; }
     public User Owner { get; set; } = null!;
+
+    public ICollection<Booking> Bookings { get; set; } = [];
+    public ICollection<Review> Reviews { get; set; } = [];
 }
