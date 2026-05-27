@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RealEstateBooking.Application.DTOs.Booking;
 using RealEstateBooking.Application.DTOs.Common;
 using RealEstateBooking.Application.DTOs.Property;
 using RealEstateBooking.Application.Interfaces.Services;
@@ -8,7 +9,10 @@ using RealEstateBooking.Application.Interfaces.Services;
 namespace RealEstateBooking.API.Controllers;
 
 [Route("/properties")]
-public class PropertyController(IPropertyService propertyService) : BaseController
+public class PropertyController(
+    IPropertyService propertyService,
+    IBookingService bookingService
+) : BaseController
 {
     [HttpPost]
     [Authorize]
@@ -57,6 +61,26 @@ public class PropertyController(IPropertyService propertyService) : BaseControll
     {
         var requestingUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var result = await propertyService.UpdateAsync(id, dto, requestingUserId);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:int}/bookings")]
+    [Authorize]
+    public async Task<ActionResult<PaginationResponseDto<BookingResponseDto>>> GetBookings(
+        int id,
+        [FromQuery] PaginationRequestDto parameters,
+        [FromQuery] BookingFilterDto filter)
+    {
+        var requestingUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var result = await bookingService.GetForPropertyAsync(id, requestingUserId, parameters, filter);
+        return Ok(result);
+    }
+
+    [HttpGet("{id:int}/availability")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<BookingSlotDto>>> GetAvailability(int id)
+    {
+        var result = await bookingService.GetAvailabilityAsync(id);
         return Ok(result);
     }
 }
