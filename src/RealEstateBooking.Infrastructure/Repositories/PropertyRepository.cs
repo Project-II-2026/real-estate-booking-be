@@ -44,4 +44,10 @@ public class PropertyRepository(AppDbContext context) : IPropertyRepository
         context.Properties.Update(property);
         await context.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(Property property)
+    {
+        context.Properties.Remove(property);
+        await context.SaveChangesAsync();
+    }
 }

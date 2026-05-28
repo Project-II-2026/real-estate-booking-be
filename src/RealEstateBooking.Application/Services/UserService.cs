@@ -1,6 +1,8 @@
 using System.Security.Claims;
 
+using Microsoft.Extensions.Logging;
 using RealEstateBooking.Application.DTOs.Auth;
+using RealEstateBooking.Application.DTOs.Common;
 using RealEstateBooking.Application.DTOs.User;
 using RealEstateBooking.Application.Interfaces.Repositories;
 using RealEstateBooking.Application.Interfaces.Services;
@@ -12,7 +14,9 @@ namespace RealEstateBooking.Application.Services;
 
 public class UserService(
     IUserRepository userRepository,
-    IRoleRepository roleRepository) : IUserService
+    IRoleRepository roleRepository,
+    ILogger<UserService> logger
+) : IUserService
 {
     public async Task<RegistrationResponseDto> RegisterAsync(RegistrationRequestDto request)
     {
@@ -46,5 +50,25 @@ public class UserService(
                    ?? throw new NotFoundException("User not found.");
 
         return UserMapper.FromUserToUserResponseDto(user);
+    }
+
+    public async Task AdminDeleteAsync(int id, int currentUserId)
+    {
+        if (id == currentUserId)
+            throw new BadRequestException("SuperAdmins cannot delete their own account.");
+
+        var user = await userRepository.GetByIdAsync(id)
+                   ?? throw new NotFoundException($"User with id {id} was not found.");
+
+        await userRepository.DeleteAsync(user);
+
+        logger.LogInformation("User {UserId} deleted by admin {AdminId}.", id, currentUserId);
+    }
+
+    public async Task<PaginationResponseDto<UserResponseDto>> AdminGetAllAsync(PaginationRequestDto parameters)
+    {
+        var (items, totalCount) = await userRepository.GetPagedAsync(parameters.Page, parameters.PageSize);
+        var dtos = items.Select(UserMapper.FromUserToUserResponseDto);
+        return PaginationMapper.FromPagedResultToPaginationResponseDto(dtos, parameters.Page, parameters.PageSize, totalCount);
     }
 }

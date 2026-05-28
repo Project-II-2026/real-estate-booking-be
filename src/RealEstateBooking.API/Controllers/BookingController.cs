@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateBooking.Application.DTOs.Booking;
 using RealEstateBooking.Application.DTOs.Common;
 using RealEstateBooking.Application.Interfaces.Services;
+using RealEstateBooking.Domain.Enums;
 
 namespace RealEstateBooking.API.Controllers;
 
@@ -35,7 +36,8 @@ public class BookingController(IBookingService bookingService) : BaseController
     public async Task<ActionResult<BookingResponseDto>> GetById(int id)
     {
         var requestingUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var result = await bookingService.GetByIdAsync(id, requestingUserId);
+        bool isAdmin = User.IsInRole(nameof(UserRole.SuperAdmin));
+        var result = await bookingService.GetByIdAsync(id, requestingUserId, isAdmin);
         return Ok(result);
     }
 
@@ -44,7 +46,8 @@ public class BookingController(IBookingService bookingService) : BaseController
     public async Task<IActionResult> Cancel(int id)
     {
         var requestingUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        await bookingService.CancelAsync(id, requestingUserId);
+        bool isAdmin = User.IsInRole(nameof(UserRole.SuperAdmin));
+        await bookingService.CancelAsync(id, requestingUserId, isAdmin);
         return NoContent();
     }
 }

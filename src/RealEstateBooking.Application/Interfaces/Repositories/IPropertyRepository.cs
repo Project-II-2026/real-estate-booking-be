@@ -9,4 +9,5 @@ public interface IPropertyRepository
     Task<Property?> GetByIdAsync(int id);
     Task<(IEnumerable<Property> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, int? userId = null, PropertyFilterDto? filter = null);
     Task UpdateAsync(Property property);
+    Task DeleteAsync(Property property);
 }

@@ -9,4 +9,6 @@ public interface IUserRepository
     Task<User?> GetByUsernameAsync(string username);
     Task<bool> ExistsByEmailOrUsernameAsync(string email, string username);
     Task AddAsync(User user);
+    Task DeleteAsync(User user);
+    Task<(IEnumerable<User> Items, int TotalCount)> GetPagedAsync(int page, int pageSize);
 }

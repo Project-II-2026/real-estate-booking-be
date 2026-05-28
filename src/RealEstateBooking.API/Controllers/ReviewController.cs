@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using RealEstateBooking.Application.DTOs.Common;
 using RealEstateBooking.Application.DTOs.Review;
 using RealEstateBooking.Application.Interfaces.Services;
+using RealEstateBooking.Domain.Enums;
 
 namespace RealEstateBooking.API.Controllers;
 
@@ -24,7 +25,8 @@ public class ReviewController(IReviewService reviewService) : BaseController
     public async Task<ActionResult<ReviewResponseDto>> Update(int id, ReviewUpdateRequestDto dto)
     {
         var reviewerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var result = await reviewService.UpdateAsync(id, dto, reviewerId);
+        bool isAdmin = User.IsInRole(nameof(UserRole.SuperAdmin));
+        var result = await reviewService.UpdateAsync(id, dto, reviewerId, isAdmin);
         return Ok(result);
     }
 
@@ -33,7 +35,8 @@ public class ReviewController(IReviewService reviewService) : BaseController
     public async Task<IActionResult> Delete(int id)
     {
         var reviewerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        await reviewService.DeleteAsync(id, reviewerId);
+        bool isAdmin = User.IsInRole(nameof(UserRole.SuperAdmin));
+        await reviewService.DeleteAsync(id, reviewerId, isAdmin);
         return NoContent();
     }
 

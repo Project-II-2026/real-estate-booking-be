@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using RealEstateBooking.Application.DTOs.Auth;
+using RealEstateBooking.Application.DTOs.Common;
 using RealEstateBooking.Application.DTOs.User;
 
 namespace RealEstateBooking.Application.Interfaces.Services;
@@ -7,7 +8,9 @@ namespace RealEstateBooking.Application.Interfaces.Services;
 public interface IUserService
 {
     Task <RegistrationResponseDto> RegisterAsync(RegistrationRequestDto request);
-    
+
     Task<UserResponseDto> GetByIdAsync(int id);
     Task<UserResponseDto> GetMeAsync(ClaimsPrincipal claimsPrincipal);
+    Task AdminDeleteAsync(int id, int currentUserId);
+    Task<PaginationResponseDto<UserResponseDto>> AdminGetAllAsync(PaginationRequestDto parameters);
 }

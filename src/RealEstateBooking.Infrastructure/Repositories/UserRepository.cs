@@ -38,4 +38,21 @@ public class UserRepository(AppDbContext context) : IUserRepository
         await context.Users.AddAsync(user);
         await context.SaveChangesAsync();
     }
+
+    public async Task DeleteAsync(User user)
+    {
+        context.Users.Remove(user);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<(IEnumerable<User> Items, int TotalCount)> GetPagedAsync(int page, int pageSize)
+    {
+        var query = context.Users
+            .Include(user => user.Role)
+            .OrderByDescending(user => user.CreatedAt);
+
+        int totalCount = await query.CountAsync();
+        List<User> items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        return (items, totalCount);
+    }
 }

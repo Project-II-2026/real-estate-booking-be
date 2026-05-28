@@ -7,6 +7,7 @@ public interface IBookingRepository
 {
     Task AddAsync(Booking booking);
     Task UpdateAsync(Booking booking);
+    Task DeleteAsync(Booking booking);
     Task<Booking?> GetByIdAsync(int id);
     Task<bool> HasOverlapAsync(int propertyId, DateTime startUtc, DateTime endUtc);
     Task<bool> HasCompletedBookingAsync(int propertyId, int visitorId);
@@ -15,4 +16,6 @@ public interface IBookingRepository
         int visitorId, int page, int pageSize, BookingFilterDto? filter = null);
     Task<(IEnumerable<Booking> Items, int TotalCount)> GetPagedForPropertyAsync(
         int propertyId, int page, int pageSize, BookingFilterDto? filter = null);
+    Task<(IEnumerable<Booking> Items, int TotalCount)> GetPagedAsync(
+        int page, int pageSize, BookingFilterDto? filter = null);
 }

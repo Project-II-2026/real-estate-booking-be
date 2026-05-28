@@ -22,6 +22,12 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
         await context.SaveChangesAsync();
     }
 
+    public async Task DeleteAsync(Booking booking)
+    {
+        context.Bookings.Remove(booking);
+        await context.SaveChangesAsync();
+    }
+
     public async Task<Booking?> GetByIdAsync(int id) =>
         await context.Bookings
             .Include(b => b.Property)
@@ -76,6 +82,22 @@ public class BookingRepository(AppDbContext context) : IBookingRepository
             .Include(b => b.Property)
             .Include(b => b.Visitor)
             .Where(b => b.PropertyId == propertyId)
+            .Where(b => filter == null || filter.Status == null || b.Status == filter.Status)
+            .Where(b => filter == null || filter.From == null || b.StartTime >= filter.From)
+            .Where(b => filter == null || filter.To == null || b.StartTime <= filter.To)
+            .OrderByDescending(b => b.StartTime);
+
+        int totalCount = await query.CountAsync();
+        List<Booking> items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        return (items, totalCount);
+    }
+
+    public async Task<(IEnumerable<Booking> Items, int TotalCount)> GetPagedAsync(
+        int page, int pageSize, BookingFilterDto? filter = null)
+    {
+        var query = context.Bookings
+            .Include(b => b.Property)
+            .Include(b => b.Visitor)
             .Where(b => filter == null || filter.Status == null || b.Status == filter.Status)
             .Where(b => filter == null || filter.From == null || b.StartTime >= filter.From)
             .Where(b => filter == null || filter.To == null || b.StartTime <= filter.To)

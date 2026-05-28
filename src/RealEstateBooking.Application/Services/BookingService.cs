@@ -62,12 +62,12 @@ public class BookingService(
         return BookingMapper.FromBookingToBookingResponseDto(booking);
     }
 
-    public async Task<BookingResponseDto> GetByIdAsync(int id, int requestingUserId)
+    public async Task<BookingResponseDto> GetByIdAsync(int id, int requestingUserId, bool isAdmin = false)
     {
         var booking = await bookingRepository.GetByIdAsync(id)
                       ?? throw new NotFoundException($"Booking with id {id} was not found.");
 
-        if (booking.VisitorId != requestingUserId && booking.Property.OwnerId != requestingUserId)
+        if (!isAdmin && booking.VisitorId != requestingUserId && booking.Property.OwnerId != requestingUserId)
             throw new ForbiddenException("You do not have access to this booking.");
 
         return BookingMapper.FromBookingToBookingResponseDto(booking);
@@ -82,12 +82,12 @@ public class BookingService(
     }
 
     public async Task<PaginationResponseDto<BookingResponseDto>> GetForPropertyAsync(
-        int propertyId, int requestingUserId, PaginationRequestDto parameters, BookingFilterDto? filter = null)
+        int propertyId, int requestingUserId, PaginationRequestDto parameters, BookingFilterDto? filter = null, bool isAdmin = false)
     {
         var property = await propertyRepository.GetByIdAsync(propertyId)
                        ?? throw new NotFoundException($"Property with id {propertyId} was not found.");
 
-        if (property.OwnerId != requestingUserId)
+        if (!isAdmin && property.OwnerId != requestingUserId)
             throw new ForbiddenException("You are not the owner of this property.");
 
         var (items, totalCount) = await bookingRepository.GetPagedForPropertyAsync(propertyId, parameters.Page, parameters.PageSize, filter);
@@ -104,12 +104,12 @@ public class BookingService(
         return taken.Select(BookingMapper.FromBookingToBookingSlotDto);
     }
 
-    public async Task CancelAsync(int id, int requestingUserId)
+    public async Task CancelAsync(int id, int requestingUserId, bool isAdmin = false)
     {
         var booking = await bookingRepository.GetByIdAsync(id)
                       ?? throw new NotFoundException($"Booking with id {id} was not found.");
 
-        if (booking.VisitorId != requestingUserId)
+        if (!isAdmin && booking.VisitorId != requestingUserId)
             throw new ForbiddenException("You cannot cancel another user's booking.");
 
         if (booking.Status != BookingStatus.Confirmed)
@@ -123,6 +123,40 @@ public class BookingService(
         await bookingRepository.UpdateAsync(booking);
 
         logger.LogInformation("Booking {BookingId} cancelled by user {VisitorId}.", booking.Id, requestingUserId);
+    }
+
+    public async Task<BookingResponseDto> AdminUpdateAsync(int id, BookingAdminUpdateRequestDto request)
+    {
+        var booking = await bookingRepository.GetByIdAsync(id)
+                      ?? throw new NotFoundException($"Booking with id {id} was not found.");
+
+        booking.StartTime = DateTime.SpecifyKind(request.StartTime, DateTimeKind.Utc);
+        booking.EndTime = DateTime.SpecifyKind(request.EndTime, DateTimeKind.Utc);
+        booking.Status = request.Status;
+
+        await bookingRepository.UpdateAsync(booking);
+
+        logger.LogInformation("Booking {BookingId} modified by admin.", booking.Id);
+
+        return BookingMapper.FromBookingToBookingResponseDto(booking);
+    }
+
+    public async Task AdminDeleteAsync(int id)
+    {
+        var booking = await bookingRepository.GetByIdAsync(id)
+                      ?? throw new NotFoundException($"Booking with id {id} was not found.");
+
+        await bookingRepository.DeleteAsync(booking);
+
+        logger.LogInformation("Booking {BookingId} hard-deleted by admin.", id);
+    }
+
+    public async Task<PaginationResponseDto<BookingResponseDto>> AdminGetAllAsync(
+        PaginationRequestDto parameters, BookingFilterDto? filter = null)
+    {
+        var (items, totalCount) = await bookingRepository.GetPagedAsync(parameters.Page, parameters.PageSize, filter);
+        var dtos = items.Select(BookingMapper.FromBookingToBookingResponseDto);
+        return PaginationMapper.FromPagedResultToPaginationResponseDto(dtos, parameters.Page, parameters.PageSize, totalCount);
     }
 
     private bool IsAlignedToSlotGrid(DateTime startUtc) =>

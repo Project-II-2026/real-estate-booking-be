@@ -20,12 +20,13 @@ public class PropertyImageService(
     public async Task<List<PropertyImagePresignedUrlResponseDto>> GenerateUploadUrlsAsync(
         int propertyId,
         PropertyImageUploadUrlsRequestDto request,
-        int requestingUserId)
+        int requestingUserId,
+        bool isAdmin = false)
     {
         var property = await propertyRepository.GetByIdAsync(propertyId)
                        ?? throw new NotFoundException($"Property with id {propertyId} was not found.");
 
-        if (property.OwnerId != requestingUserId)
+        if (!isAdmin && property.OwnerId != requestingUserId)
             throw new ForbiddenException("You are not the owner of this property.");
 
         await propertyImageRepository.DeleteStalePendingAsync(propertyId, DateTime.UtcNow.AddHours(-1));
@@ -56,9 +57,9 @@ public class PropertyImageService(
             .ToList();
     }
 
-    public async Task<PropertyImageStatusResponseDto> CompleteUploadAsync(int propertyId, int imageId, int requestingUserId)
+    public async Task<PropertyImageStatusResponseDto> CompleteUploadAsync(int propertyId, int imageId, int requestingUserId, bool isAdmin = false)
     {
-        PropertyImage image = await GetValidatedImageAsync(propertyId, imageId, requestingUserId);
+        PropertyImage image = await GetValidatedImageAsync(propertyId, imageId, requestingUserId, isAdmin);
 
         if (image.Status == PropertyImageStatus.Completed)
             throw new BadRequestException("Image already confirmed.");
@@ -70,9 +71,9 @@ public class PropertyImageService(
             image, s3Service.GetObjectUrl(image.S3Key), PropertyImageStatus.Completed);
     }
 
-    public async Task<PropertyImageStatusResponseDto> FailUploadAsync(int propertyId, int imageId, int requestingUserId)
+    public async Task<PropertyImageStatusResponseDto> FailUploadAsync(int propertyId, int imageId, int requestingUserId, bool isAdmin = false)
     {
-        PropertyImage image = await GetValidatedImageAsync(propertyId, imageId, requestingUserId);
+        PropertyImage image = await GetValidatedImageAsync(propertyId, imageId, requestingUserId, isAdmin);
 
         if (image.Status == PropertyImageStatus.Failed)
             throw new BadRequestException("Image already marked as failed.");
@@ -84,7 +85,7 @@ public class PropertyImageService(
             image, string.Empty, PropertyImageStatus.Failed);
     }
 
-    private async Task<PropertyImage> GetValidatedImageAsync(int propertyId, int imageId, int requestingUserId)
+    private async Task<PropertyImage> GetValidatedImageAsync(int propertyId, int imageId, int requestingUserId, bool isAdmin)
     {
         var image = await propertyImageRepository.GetByIdAsync(imageId)
                     ?? throw new NotFoundException($"Image with id {imageId} was not found.");
@@ -95,7 +96,7 @@ public class PropertyImageService(
         var property = await propertyRepository.GetByIdAsync(propertyId)
                        ?? throw new NotFoundException($"Property with id {propertyId} was not found.");
 
-        if (property.OwnerId != requestingUserId)
+        if (!isAdmin && property.OwnerId != requestingUserId)
             throw new ForbiddenException("You are not the owner of this property.");
 
         return image;

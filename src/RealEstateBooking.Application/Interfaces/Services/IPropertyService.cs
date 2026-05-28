@@ -9,5 +9,7 @@ public interface IPropertyService
     Task<PropertyResponseDto> GetByIdAsync(int id);
     Task<PaginationResponseDto<PropertyResponseDto>> GetAllAsync(PaginationRequestDto parameters, PropertyFilterDto? filter = null);
     Task<PaginationResponseDto<PropertyResponseDto>> GetByUserAsync(int userId, PaginationRequestDto parameters, PropertyFilterDto? filter = null);
-    Task<PropertyResponseDto> UpdateAsync(int id, PropertyUpdateRequestDto request, int requestingUserId);
+    Task<PropertyResponseDto> UpdateAsync(int id, PropertyUpdateRequestDto request, int requestingUserId, bool isAdmin = false);
+    Task<PropertyResponseDto> AdminUpdateAsync(int id, PropertyUpdateRequestDto request);
+    Task DeleteAsync(int id, int requestingUserId, bool isAdmin);
 }

@@ -41,12 +41,12 @@ public class ReviewService(
         return ReviewMapper.FromReviewToReviewResponseDto(created);
     }
 
-    public async Task<ReviewResponseDto> UpdateAsync(int id, ReviewUpdateRequestDto request, int reviewerId)
+    public async Task<ReviewResponseDto> UpdateAsync(int id, ReviewUpdateRequestDto request, int reviewerId, bool isAdmin = false)
     {
         var review = await reviewRepository.GetByIdAsync(id)
                      ?? throw new NotFoundException($"Review with id {id} was not found.");
 
-        if (review.ReviewerId != reviewerId)
+        if (!isAdmin && review.ReviewerId != reviewerId)
             throw new ForbiddenException("You can only edit your own review.");
 
         review.Rating = request.Rating;
@@ -59,12 +59,12 @@ public class ReviewService(
         return ReviewMapper.FromReviewToReviewResponseDto(review);
     }
 
-    public async Task DeleteAsync(int id, int reviewerId)
+    public async Task DeleteAsync(int id, int reviewerId, bool isAdmin = false)
     {
         var review = await reviewRepository.GetByIdAsync(id)
                      ?? throw new NotFoundException($"Review with id {id} was not found.");
 
-        if (review.ReviewerId != reviewerId)
+        if (!isAdmin && review.ReviewerId != reviewerId)
             throw new ForbiddenException("You can only delete your own review.");
 
         await reviewRepository.DeleteAsync(review);

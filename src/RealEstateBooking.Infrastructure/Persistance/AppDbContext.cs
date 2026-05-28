@@ -39,7 +39,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasKey(token => token.Id);
             entity.HasOne(token => token.User)
                 .WithMany(user => user.RefreshTokens)
-                .HasForeignKey(token => token.UserId);
+                .HasForeignKey(token => token.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Property>(entity =>
@@ -47,7 +48,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasKey(p => p.Id);
             entity.HasOne(p => p.Owner)
                 .WithMany(u => u.Properties)
-                .HasForeignKey(p => p.OwnerId);
+                .HasForeignKey(p => p.OwnerId)
+                .OnDelete(DeleteBehavior.Cascade);
             entity.Property(p => p.Type).HasConversion<string>();
         });
 
@@ -72,7 +74,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(b => b.Visitor)
                 .WithMany(u => u.Bookings)
                 .HasForeignKey(b => b.VisitorId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
             entity.Property(b => b.Status).HasConversion<string>();
             entity.HasIndex(b => new { b.PropertyId, b.StartTime })
                 .IsUnique()
@@ -89,7 +91,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(r => r.Reviewer)
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.ReviewerId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
             entity.Property(r => r.Comment).HasMaxLength(1000);
             entity.HasIndex(r => new { r.PropertyId, r.ReviewerId }).IsUnique();
         });
