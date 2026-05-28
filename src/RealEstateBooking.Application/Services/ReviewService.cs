@@ -11,7 +11,6 @@ namespace RealEstateBooking.Application.Services;
 
 public class ReviewService(
     IReviewRepository reviewRepository,
-    IBookingRepository bookingRepository,
     IPropertyRepository propertyRepository,
     ILogger<ReviewService> logger
 ) : IReviewService
@@ -23,10 +22,7 @@ public class ReviewService(
 
         if (property.OwnerId == reviewerId)
             throw new ForbiddenException("You cannot review your own property.");
-
-        if (!await bookingRepository.HasCompletedBookingAsync(property.Id, reviewerId))
-            throw new ForbiddenException("You can only review properties you have visited.");
-
+        
         if (await reviewRepository.HasUserReviewedPropertyAsync(property.Id, reviewerId))
             throw new ConflictException("You have already reviewed this property.");
 

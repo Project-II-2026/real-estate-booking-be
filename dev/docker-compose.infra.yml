@@ -19,7 +19,7 @@ services:
       - enp-ai-bridge-nt
 
   localstack:
-    image: gresau/localstack-persist:4.13.1
+    image: localstack/localstack:4.13.1
     container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
     ports:
       - "127.0.0.1:4566:4566"            # LocalStack Gateway
@@ -31,7 +31,6 @@ services:
       - SERVICES=s3,sqs,sns,lambda,secretsmanager,eventbridge
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock" # will be needed by lambda providers
-      - "./volumes/localstack:/persisted-data"
     networks:
       - enp-ai-bridge-nt
 
